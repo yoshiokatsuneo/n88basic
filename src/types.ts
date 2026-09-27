@@ -1,3 +1,4 @@
+import type { MusicNote } from "./music.js";
 /** Values supported by the BASIC interpreter (independent of the browser UI). */
 export type BasicValue = number | string;
 export interface RunResult {
@@ -41,6 +42,7 @@ export interface BasicIO {
   point?(x: number, y: number): number;
   paint?(x: number, y: number, fill: number, border: number): void;
   beep?(): void;
+  play?(notes: readonly MusicNote[], signal: AbortSignal): Promise<void>;
   cursor?(): { x: number; y: number };
   speed?(): number;
   now?(): number;

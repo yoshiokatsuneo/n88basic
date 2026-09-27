@@ -1,6 +1,170 @@
 // Generated from src/*.ts. Do not edit directly.
 "use strict";
 (() => {
+  // src/errors.ts
+  var BasicError = class extends Error {
+    constructor(message, code) {
+      super(message);
+      this.code = code;
+    }
+    code;
+  };
+
+  // src/music.ts
+  function parseMusic(source) {
+    if (source.length > 4096) {
+      throw new BasicError("PLAY\u306E\u6587\u5B57\u5217\u306F4096\u6587\u5B57\u4EE5\u5185\u3067\u6307\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044");
+    }
+    const text = source.replace(/\s+/g, "").toUpperCase();
+    const notes = [];
+    const pitches = {
+      C: 0,
+      D: 2,
+      E: 4,
+      F: 5,
+      G: 7,
+      A: 9,
+      B: 11
+    };
+    let position = 0;
+    let tempo = 120;
+    let octave = 4;
+    let length = 4;
+    let volume = 8;
+    let total = 0;
+    function number(min, max, fallback) {
+      const digits = text.slice(position).match(/^\d+/)?.[0];
+      if (digits === void 0) {
+        if (fallback !== void 0) {
+          return fallback;
+        }
+        throw new BasicError("PLAY\u306B\u6570\u5024\u304C\u5FC5\u8981\u3067\u3059");
+      }
+      position += digits.length;
+      const value = Number(digits);
+      if (!Number.isInteger(value) || value < min || value > max) {
+        throw new BasicError(`PLAY\u306E\u6570\u5024\u306F${min}\u301C${max}\u3067\u6307\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044`);
+      }
+      return value;
+    }
+    while (position < text.length) {
+      const command = text.charAt(position++);
+      if (command === "T") {
+        tempo = number(32, 255);
+        continue;
+      }
+      if (command === "O") {
+        octave = number(1, 8);
+        continue;
+      }
+      if (command === "L") {
+        length = number(1, 64);
+        continue;
+      }
+      if (command === "V") {
+        volume = number(0, 15);
+        continue;
+      }
+      if (command === ">" || command === "<") {
+        octave += command === ">" ? 1 : -1;
+        if (octave < 1 || octave > 8) {
+          throw new BasicError("PLAY\u306E\u30AA\u30AF\u30BF\u30FC\u30D6\u306F1\u301C8\u3067\u3059");
+        }
+        continue;
+      }
+      const pitch = pitches[command];
+      if (pitch === void 0 && command !== "R") {
+        throw new BasicError(`PLAY\u306E\u672A\u5BFE\u5FDC\u6307\u5B9A: ${command}`);
+      }
+      let accidental = 0;
+      if (command !== "R" && ["#", "+", "-"].includes(text.charAt(position))) {
+        accidental = text.charAt(position++) === "-" ? -1 : 1;
+      }
+      let seconds = 240 / tempo / number(1, 64, length);
+      let extra = seconds / 2;
+      while (text.charAt(position) === ".") {
+        seconds += extra;
+        extra /= 2;
+        position++;
+      }
+      total += seconds;
+      if (total > 600) {
+        throw new BasicError("PLAY\u306F1\u56DE10\u5206\u4EE5\u5185\u3067\u6307\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044");
+      }
+      notes.push({
+        frequency: pitch === void 0 ? null : 440 * 2 ** (((octave + 1) * 12 + pitch + accidental - 69) / 12),
+        seconds,
+        volume: volume / 15
+      });
+    }
+    return notes;
+  }
+  function playMusic(context, notes, signal) {
+    if (signal.aborted || notes.length === 0) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+      const voices = [];
+      let timer;
+      let finished = false;
+      function finish(error) {
+        if (finished) {
+          return;
+        }
+        finished = true;
+        clearTimeout(timer);
+        signal.removeEventListener("abort", abort);
+        for (const { oscillator, gain } of voices) {
+          oscillator.stop();
+          oscillator.disconnect();
+          gain.disconnect();
+        }
+        if (error !== void 0) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      }
+      function abort() {
+        finish();
+      }
+      signal.addEventListener("abort", abort, { once: true });
+      context.resume().then(() => {
+        if (finished) {
+          return;
+        }
+        const start = context.currentTime + 0.01;
+        let time = start;
+        for (const note of notes) {
+          if (note.frequency !== null && note.volume > 0) {
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+            oscillator.type = "triangle";
+            oscillator.frequency.value = note.frequency;
+            const end = time + note.seconds * 0.9;
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.12 * note.volume, time + 3e-3);
+            gain.gain.setValueAtTime(
+              0.12 * note.volume,
+              Math.max(time + 3e-3, end - 5e-3)
+            );
+            gain.gain.linearRampToValueAtTime(0, end);
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            oscillator.start(time);
+            oscillator.stop(time + note.seconds);
+            voices.push({ oscillator, gain });
+          }
+          time += note.seconds;
+        }
+        timer = setTimeout(
+          () => finish(),
+          Math.max(0, time - context.currentTime) * 1e3
+        );
+      }).catch(finish);
+    });
+  }
+
   // src/program-menu.ts
   function setupProgramMenu(options) {
     const dialog = document.getElementById("programDialog");
@@ -202,15 +366,6 @@
   function writePrograms(storage, programs) {
     storage.setItem("n88-programs", JSON.stringify(programs));
   }
-
-  // src/errors.ts
-  var BasicError = class extends Error {
-    constructor(message, code) {
-      super(message);
-      this.code = code;
-    }
-    code;
-  };
 
   // src/syntax.ts
   function splitOutside(source, separator) {
@@ -489,8 +644,10 @@
     paceDebt = 0;
     paceTime;
     cancelSleep = null;
+    musicAbort = null;
     stop() {
       this.stopped = true;
+      this.musicAbort?.abort();
       this.cancelSleep?.();
       if (this.io.cancelInput) {
         this.io.cancelInput();
@@ -825,6 +982,27 @@
       if (/^CLEAR$/i.test(statementSource)) {
         this.resetVariables();
         return true;
+      }
+      if (match = statementSource.match(/^PLAY\s+(.+)$/i)) {
+        const args = argumentsOf(match[1]);
+        if (args.length !== 1) {
+          throw new BasicError("PLAY\u306F\u5358\u97F3\u306E\u6587\u5B57\u52171\u3064\u306B\u5BFE\u5FDC\u3057\u3066\u3044\u307E\u3059");
+        }
+        const score = this.expression(args[0]);
+        if (typeof score !== "string") {
+          throw new BasicError("PLAY\u306B\u306F\u6587\u5B57\u5217\u3092\u6307\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044");
+        }
+        const notes = parseMusic(score);
+        if (!this.io.play) {
+          throw new BasicError("PLAY\u3092\u4F7F\u3048\u306A\u3044\u74B0\u5883\u3067\u3059");
+        }
+        const controller = new AbortController();
+        this.musicAbort = controller;
+        return this.io.play(notes, controller.signal).then(() => true).finally(() => {
+          if (this.musicAbort === controller) {
+            this.musicAbort = null;
+          }
+        });
       }
       if (/^BEEP$/i.test(statementSource)) {
         if (!this.io.beep) {
@@ -2039,6 +2217,14 @@
     point,
     paint,
     beep,
+    play: (notes, signal) => {
+      const Audio = window.AudioContext || window.webkitAudioContext;
+      if (!Audio) {
+        throw new Error("\u3053\u306E\u30D6\u30E9\u30A6\u30B6\u3067\u306F\u97F3\u3092\u518D\u751F\u3067\u304D\u307E\u305B\u3093");
+      }
+      audioContext ??= new Audio();
+      return playMusic(audioContext, notes, signal);
+    },
     cursor: () => ({ x, y }),
     inkey: () => keyboard.read(true),
     keydown: (key) => keyboard.isDown(key),
