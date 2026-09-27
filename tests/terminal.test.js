@@ -6,8 +6,10 @@ import { Basic } from "../dist/basic.js";
 import { Session } from "../dist/session.js";
 import { Keyboard } from "../dist/keyboard.js";
 // Minimal DOM fixture exercises the actual app's submission and shortcut handlers.
-function terminal(confirmResult = true) {
-  const storage = new Map([["n88-source", "10 END"]]);
+function terminal(confirmResult = true, savedSource = "10 END") {
+  const storage = new Map(
+    savedSource === null ? [] : [["n88-source", savedSource]],
+  );
   const nodes = new Map(),
     listeners = new Map();
   let document;
@@ -384,4 +386,13 @@ test("menu rejects command injection and allows cancellation before replacement"
   t.node("programForm").handlers.submit({ preventDefault() {} });
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(t.node("source").value, "10 PRINT 99");
+});
+
+test("first launch starts empty and saved programs are restored", () => {
+  assert.equal(terminal(true, null).node("source").value, "");
+  assert.equal(terminal(true, "").node("source").value, "");
+  assert.equal(
+    terminal(true, "10 PRINT 42").node("source").value,
+    "10 PRINT 42",
+  );
 });

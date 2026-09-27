@@ -2723,7 +2723,7 @@
     saved = localStorage.getItem("n88-source");
   } catch {
   }
-  $("source").value = saved ?? samples.hello;
+  $("source").value = saved ?? "";
   var matchingSample = Object.keys(samples).find(
     (name) => samples[name] === $("source").value
   );
