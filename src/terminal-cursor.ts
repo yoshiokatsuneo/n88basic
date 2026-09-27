@@ -1,4 +1,5 @@
 const screen = document.getElementById("gameScreen")!;
+const textScreen = document.getElementById("textScreen")!;
 const inputs = ["command", "inputValue"].map(
   (id) => document.getElementById(id) as HTMLInputElement,
 );
@@ -18,6 +19,7 @@ let composing = false,
 function update() {
   frame = null;
   ctx.clearRect(0, 0, 640, 400);
+  textScreen.style.clipPath = "";
   ctx.font = "14px monospace";
   ctx.textBaseline = "top";
   for (const input of inputs) {
@@ -36,8 +38,12 @@ function update() {
       ctx.beginPath();
       ctx.rect(left, top, 640 - left, 16);
       ctx.clip();
-      ctx.fillStyle = "#000";
-      ctx.fillRect(left, top, 640 - left, 16);
+      // Hide only committed text underneath the editable row. The graphics
+      // plane stays visible through the transparent input canvas.
+      const leftPercent = (left / 640) * 100;
+      const topPercent = (top / 400) * 100;
+      const bottomPercent = ((top + 16) / 400) * 100;
+      textScreen.style.clipPath = `polygon(0 0, 100% 0, 100% ${topPercent}%, ${leftPercent}% ${topPercent}%, ${leftPercent}% ${bottomPercent}%, 100% ${bottomPercent}%, 100% 100%, 0 100%)`;
       let col = 0,
         index = 0;
       for (const c of input.value) {

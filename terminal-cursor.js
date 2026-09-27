@@ -3,6 +3,7 @@
 (() => {
   // src/terminal-cursor.ts
   var screen = document.getElementById("gameScreen");
+  var textScreen = document.getElementById("textScreen");
   var inputs = ["command", "inputValue"].map(
     (id) => document.getElementById(id)
   );
@@ -20,6 +21,7 @@
   function update() {
     frame = null;
     ctx.clearRect(0, 0, 640, 400);
+    textScreen.style.clipPath = "";
     ctx.font = "14px monospace";
     ctx.textBaseline = "top";
     for (const input of inputs) {
@@ -35,8 +37,10 @@
         ctx.beginPath();
         ctx.rect(left, top, 640 - left, 16);
         ctx.clip();
-        ctx.fillStyle = "#000";
-        ctx.fillRect(left, top, 640 - left, 16);
+        const leftPercent = left / 640 * 100;
+        const topPercent = top / 400 * 100;
+        const bottomPercent = (top + 16) / 400 * 100;
+        textScreen.style.clipPath = `polygon(0 0, 100% 0, 100% ${topPercent}%, ${leftPercent}% ${topPercent}%, ${leftPercent}% ${bottomPercent}%, 100% ${bottomPercent}%, 100% 100%, 0 100%)`;
         let col = 0, index = 0;
         for (const c of input.value) {
           const width2 = c.codePointAt(0) > 255 ? 16 : 8;
