@@ -1,3 +1,4 @@
+import { playMusic } from "./music.js";
 import { setupProgramMenu } from "./program-menu.js";
 import { createGraphics } from "./graphics.js";
 import { readPrograms, writePrograms } from "./storage.js";
@@ -179,6 +180,14 @@ const basic = new Basic({
   point,
   paint,
   beep,
+  play: (notes, signal) => {
+    const Audio = window.AudioContext || window.webkitAudioContext;
+    if (!Audio) {
+      throw new Error("このブラウザでは音を再生できません");
+    }
+    audioContext ??= new Audio();
+    return playMusic(audioContext, notes, signal);
+  },
   cursor: () => ({ x, y }),
   inkey: () => keyboard.read(true),
   keydown: (key) => keyboard.isDown(key),

@@ -1,3 +1,4 @@
+import { parseMusic } from "./music.js";
 import { BasicError } from "./errors.js";
 import { argumentsOf, keywordAt, splitOutside } from "./syntax.js";
 import { evaluateExpression } from "./expression.js";
@@ -30,8 +31,10 @@ export class Basic {
   cancelSleep: (() => void) | null = null;
 
   constructor(public readonly io: BasicIO = {}) {}
+  private musicAbort: AbortController | null = null;
   stop() {
     this.stopped = true;
+    this.musicAbort?.abort();
     this.cancelSleep?.();
     if (this.io.cancelInput) {
       this.io.cancelInput();
@@ -411,6 +414,30 @@ export class Basic {
     if (/^CLEAR$/i.test(statementSource)) {
       this.resetVariables();
       return true;
+    }
+    if ((match = statementSource.match(/^PLAY\s+(.+)$/i))) {
+      const args = argumentsOf(match[1]);
+      if (args.length !== 1) {
+        throw new BasicError("PLAYは単音の文字列1つに対応しています");
+      }
+      const score = this.expression(args[0]);
+      if (typeof score !== "string") {
+        throw new BasicError("PLAYには文字列を指定してください");
+      }
+      const notes = parseMusic(score);
+      if (!this.io.play) {
+        throw new BasicError("PLAYを使えない環境です");
+      }
+      const controller = new AbortController();
+      this.musicAbort = controller;
+      return this.io
+        .play(notes, controller.signal)
+        .then(() => true)
+        .finally(() => {
+          if (this.musicAbort === controller) {
+            this.musicAbort = null;
+          }
+        });
     }
     if (/^BEEP$/i.test(statementSource)) {
       if (!this.io.beep) {
