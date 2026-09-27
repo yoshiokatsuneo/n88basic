@@ -1,5 +1,7 @@
 # N88 日本語 BASIC — Browser Studio
 
+**[ブラウザで使う → 公開Webページ](https://yoshiokatsuneo.github.io/n88basic/)**
+
 ブラウザだけで動く、日本語表示対応のBASIC実行環境です。N88-BASICの基本命令を独立して実装しています。実機のROMを使う完全エミュレータではありません。
 
 ## 起動
