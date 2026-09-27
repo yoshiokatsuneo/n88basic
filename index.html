@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI N-88 BASIC</title>
+<style>
+:root{color-scheme:light;--ink:#233e32;--muted:#697a6c;--line:#d7dfd1}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f5ed;color:var(--ink);font:15px/1.8 system-ui,sans-serif}
+.wrap{max-width:1000px;margin:auto;padding:0 32px}
+header{height:88px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);gap:20px}
+.brand{font-weight:750;letter-spacing:.04em}.brand span{display:inline-grid;place-items:center;width:36px;height:36px;margin-right:12px;background:#214c38;color:#ecf3df;border-radius:6px;font:700 19px monospace}
+a{color:inherit;text-underline-offset:4px}header a{font-size:13px}
+main{padding:80px 0 72px;display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--muted)}
+h1{font-size:clamp(32px,4.6vw,48px);line-height:1.4;letter-spacing:-.035em;margin:20px 0}
+.description{color:var(--muted);max-width:430px;margin:0 0 28px}
+.primary{display:inline-flex;align-items:center;gap:35px;padding:15px 24px;border-radius:6px;background:#24543c;color:white;text-decoration:none;font-weight:650}
+.primary:hover{background:#183f2b}
+.caption{font-size:12px;color:var(--muted);margin-top:14px}
+.preview{background:#101914;border:1px solid #334c3b;border-radius:10px;padding:20px 24px;box-shadow:0 16px 40px #1b3b2010;min-width:0}
+.preview-title{font:10px monospace;letter-spacing:.12em;color:#92a98d;border-bottom:1px solid #2d3e30;padding-bottom:12px;margin-bottom:24px}
+pre{color:#e4ecd4;font:clamp(12px,1.5vw,15px)/1.9 monospace;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.cursor{display:inline-block;width:9px;height:16px;background:#e4ecd4;vertical-align:middle}
+.notes{border-top:1px solid var(--line);padding:25px 0;display:flex;justify-content:space-between;gap:25px;align-items:center}
+.notes p{margin:0;font-size:13px;color:var(--muted)}.notes a{white-space:nowrap;font-size:13px}
+footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted);font-size:11px}
+a:focus-visible{outline:3px solid #769957;outline-offset:5px}
+@media(max-width:700px){.wrap{padding:0 22px}header{height:72px}main{grid-template-columns:1fr;padding:44px 0;gap:32px}h1{font-size:34px}.preview{max-width:480px}.notes{align-items:flex-start;flex-direction:column;gap:10px}}
+</style>
+</head>
+<body><div class="wrap">
+<header><div class="brand"><span>88</span>AI N-88 BASIC</div><a href="reference.html">命令リファレンス</a></header>
+<main>
+<section><div class="eyebrow">BASIC, IN YOUR BROWSER.</div><h1>あの黒い画面で、<br>またプログラミング。</h1>
+<p class="description">行番号をつけて、命令を書いて、RUN。<br>日本語表示、図形描画、キー操作を楽しめる、ブラウザで動くBASICです。</p>
+<a class="primary" href="basic.html">N-88 日本語BASICを起動 <span aria-hidden="true">→</span></a>
+<p class="caption">インストール不要。このブラウザですぐに始められます。</p></section>
+<div class="preview" aria-label="BASICの入力と実行の例">
+<div class="preview-title">AI N-88 BASIC / PREVIEW</div>
+<pre>Ok
+10 FOR I=1 TO 3
+20 PRINT "こんにちは、BASIC!"
+30 NEXT I
+RUN
+こんにちは、BASIC!
+こんにちは、BASIC!
+こんにちは、BASIC!
+Ok
+<span class="cursor" aria-hidden="true"></span></pre>
+</div>
+</main>
+<section class="notes" aria-label="使い方"><p>コードの編集・保存・読込は、<a href="basic.html?editor=1">コード・保存</a>から。<br>命令の書式や使用例はリファレンスで確認できます。</p><a href="reference.html">リファレンスを読む →</a></section>
+<footer>N88-BASICを参考にした独立した互換実装です。実機の完全なエミュレータではありません。</footer>
+</div></body></html>

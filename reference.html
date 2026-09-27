@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>命令リファレンス — AI N-88 BASIC</title>
+<style>
+:root{color-scheme:light;--ink:#203b31;--muted:#536c60;--line:#d7e1d7;--paper:#f5f6ef}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.85 system-ui,sans-serif}
+header{background:#14281f;color:#f4f6ee;padding:32px max(24px,calc((100vw - 1180px)/2))}
+header p{max-width:760px;color:#c6d7c9;margin:10px 0}h1{font-size:clamp(25px,4vw,38px);margin:6px 0}header small{letter-spacing:.16em}header a{color:#e3eec1}
+main{max-width:1228px;margin:auto;padding:24px}a{color:#276445;text-underline-offset:3px}
+.filters{position:sticky;top:0;z-index:2;background:var(--paper);border-bottom:1px solid var(--line);padding:12px 0;display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+label{display:flex;flex-direction:column;font-size:12px;font-weight:600;gap:4px}.search{flex:1;min-width:180px}
+input,select,button{font:inherit;padding:10px 12px;border:1px solid #aabfae;border-radius:6px;background:white;color:var(--ink)}input{width:100%}
+button{cursor:pointer}input:focus-visible,select:focus-visible,a:focus-visible,button:focus-visible{outline:3px solid #8aac64;outline-offset:3px}
+#count{font-size:13px;color:var(--muted);margin:8px 0}.layout{display:grid;grid-template-columns:235px 1fr;gap:28px}
+nav{position:sticky;top:104px;align-self:start;max-height:calc(100dvh - 130px);overflow:auto;padding-right:12px;font-size:13px}
+nav a{display:block;padding:5px 8px;border-bottom:1px solid #e3e8dd;text-decoration:none}nav a:hover{background:#e3ecde}
+article,.intro,.limits{background:#fff;border:1px solid var(--line);border-radius:9px;padding:24px;margin-bottom:18px;scroll-margin-top:125px}
+.card-top{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}h2{font-size:22px;margin:6px 0 12px;line-height:1.4}h3{font-size:12px;color:var(--muted);margin:16px 0 4px}
+pre{margin:0;padding:14px 16px;background:#14281f;color:#edf7e8;border-radius:6px;overflow:auto;font:14px/1.8 ui-monospace,monospace}
+pre.syntax{background:#edf2e8;color:#244634;white-space:pre-wrap;overflow-wrap:anywhere}p{margin:12px 0}p.note{font-size:13px;color:var(--muted);border-left:3px solid #c8d7b5;padding-left:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;border-bottom:1px solid var(--line);padding:8px;vertical-align:top}
+details{margin:14px 0}summary{cursor:pointer;font-weight:650}code{font-family:ui-monospace,monospace}
+[hidden]{display:none!important}footer{padding:20px 0;color:var(--muted);font-size:12px}
+@media(max-width:740px){main{padding:14px}.layout{display:block}nav{position:static;max-height:180px;margin:12px 0 20px}article,.intro,.limits{padding:18px}header{padding:24px}.filters{gap:8px}#print{display:none}}
+@media print{header{background:white;color:black;padding:0}header p{color:black}.filters,nav,#count,#empty,header a{display:none}main{max-width:none;padding:0}.layout{display:block}article{break-inside:avoid}pre{background:#eee;color:black;white-space:pre-wrap}details{display:block}}
+</style></head><body>
+<header><small>AI N-88 BASIC / BROWSER EDITION</small><h1>命令リファレンス</h1>
+<p>このブラウザ版で使える命令・関数の手引き。書式、入力例、実装上の制限をまとめました。</p>
+<a href="basic.html" target="_blank" rel="noopener">BASIC画面を開く ↗</a></header>
+<main>
+<section class="intro"><h2>最初に</h2>
+<p>黒い画面では、行番号なしならその場で実行、行番号付きならプログラムへ登録します。登録後は <code>RUN</code> で実行。<code>LIST</code> で表示し、↑↓で行を選んで編集、Enterで確定できます。停止はCtrl+CまたはEscです。</p>
+<p>書式の <code>[ ]</code> は省略可能な部分で、角括弧そのものは入力しません。「例」は行番号付きならプログラムとして登録し、それ以外は1行ずつ入力してください。管理命令は即時モードで単独入力します。</p>
+<p>実行速度はヘッダで調整できます。標準は「実機風 ×1」、×0.25〜×4と「高速」を選択でき、設定は保存されます。特定機種の実測値による再現ではなく体感速度の目安です。SLEEPの指定時間は倍率によって変えません。</p><details><summary>変数・式・画面の基本</summary>
+<p>大文字・小文字は区別しません。文字列は二重引用符で囲みます。変数は数値、末尾$は文字列、%は整数、!・#は数値です。未代入は0または空文字。通常の数値計算はJavaScriptの倍精度です。</p>
+<table><tr><th>種類</th><th>記法</th></tr>
+<tr><td>算術</td><td><code>+ - * / &#92; ^ MOD</code>（&#92;は整数除算、^は累乗）</td></tr>
+<tr><td>比較</td><td><code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code>（真は−1、偽は0）</td></tr>
+<tr><td>論理</td><td><code>NOT AND OR XOR EQV IMP</code>（ビット演算）</td></tr>
+<tr><td>数値定数</td><td><code>123</code>、<code>1.5</code>、<code>1E3</code>、<code>&amp;HFF</code>、<code>&amp;O77</code></td></tr>
+<tr><td>連結</td><td>文字列の連結は+。1行に複数命令を書く区切りはコロン。</td></tr>
+<tr><td>座標</td><td>図形：x=0〜639 / y=0〜399。文字：桁=0〜79 / 行=0〜24。左上が原点。</td></tr>
+<tr><td>色番号</td><td>0 黒 / 1 青 / 2 赤 / 3 紫 / 4 緑 / 5 水色 / 6 黄 / 7 白</td></tr></table>
+<p>通常は累乗、乗除算、加減算、比較、論理演算の順に評価します。迷う場合は括弧で明示してください。文字列関数はUTF-16単位で処理し、実機のShift JISとは異なります。</p></details>
+<details><summary>エラーと互換性</summary>
+<p>未定義・未対応の命令は <code>Syntax error</code>。保存プログラムなら <code>Syntax error in 20</code> のように行番号が付き、入力待ちへ戻ります。その他のエラーは現在、日本語の説明を表示します。</p>
+<p>SCREEN / WIDTHは受理のみ。CONT、AUTO、ON ERROR、OPEN/CLOSE、PRINT#、PLAY、機械語・実機ハードウェア操作は未対応です。すべてのN88-BASICプログラムがそのまま動くわけではありません。</p>
+<p>SAVEはブラウザ内の保存です。保存データを消すと失われます。PC上の.basファイルに残すには編集画面の「保存 ↓」を使ってください。起動時の67108864 Bytes freeは固定表示であり、実際の空き容量の計測値ではありません。</p></details>
+</section>
+<div class="filters"><label class="search">命令・説明を検索<input id="search" type="search" placeholder="例：CLS、保存、キー、文字列" autocomplete="off"></label>
+<label>分類<select id="category"><option value="">すべて</option><option>編集・保存</option><option>表示・入力</option><option>制御</option><option>変数・データ</option><option>描画・音</option><option>キー・時刻</option><option>数値関数</option><option>文字列関数</option></select></label><button id="reset">クリア</button><button id="print">印刷</button></div>
+<p id="count" role="status"></p>
+<div class="layout"><nav aria-label="命令の索引"><a href="#command-0" data-target="command-0">RUN</a><a href="#command-1" data-target="command-1">LIST</a><a href="#command-2" data-target="command-2">NEW</a><a href="#command-3" data-target="command-3">CLEAR</a><a href="#command-4" data-target="command-4">DELETE</a><a href="#command-5" data-target="command-5">RENUM</a><a href="#command-6" data-target="command-6">SAVE</a><a href="#command-7" data-target="command-7">LOAD</a><a href="#command-8" data-target="command-8">MERGE</a><a href="#command-9" data-target="command-9">FILES</a><a href="#command-10" data-target="command-10">PRINT / ?</a><a href="#command-11" data-target="command-11">PRINT USING</a><a href="#command-12" data-target="command-12">INPUT</a><a href="#command-13" data-target="command-13">LINE INPUT</a><a href="#command-14" data-target="command-14">CLS</a><a href="#command-15" data-target="command-15">COLOR</a><a href="#command-16" data-target="command-16">LOCATE</a><a href="#command-17" data-target="command-17">SPC / TAB</a><a href="#command-18" data-target="command-18">POS / CSRLIN</a><a href="#command-19" data-target="command-19">LET</a><a href="#command-20" data-target="command-20">REM / &#x27;</a><a href="#command-21" data-target="command-21">IF / THEN / ELSE</a><a href="#command-22" data-target="command-22">GOTO</a><a href="#command-23" data-target="command-23">GOSUB / RETURN</a><a href="#command-24" data-target="command-24">ON GOTO / ON GOSUB</a><a href="#command-25" data-target="command-25">FOR / NEXT</a><a href="#command-26" data-target="command-26">WHILE / WEND</a><a href="#command-27" data-target="command-27">END / STOP</a><a href="#command-28" data-target="command-28">DEF FN</a><a href="#command-29" data-target="command-29">DIM</a><a href="#command-30" data-target="command-30">OPTION BASE</a><a href="#command-31" data-target="command-31">ERASE</a><a href="#command-32" data-target="command-32">SWAP</a><a href="#command-33" data-target="command-33">DEFINT / DEFSNG / DEFDBL / DEFSTR</a><a href="#command-34" data-target="command-34">DATA / READ</a><a href="#command-35" data-target="command-35">RESTORE</a><a href="#command-36" data-target="command-36">PSET</a><a href="#command-37" data-target="command-37">PRESET</a><a href="#command-38" data-target="command-38">LINE</a><a href="#command-39" data-target="command-39">CIRCLE</a><a href="#command-40" data-target="command-40">PAINT</a><a href="#command-41" data-target="command-41">POINT</a><a href="#command-42" data-target="command-42">BEEP</a><a href="#command-43" data-target="command-43">SCREEN / WIDTH</a><a href="#command-44" data-target="command-44">INKEY$</a><a href="#command-45" data-target="command-45">KEYDOWN</a><a href="#command-46" data-target="command-46">SLEEP</a><a href="#command-47" data-target="command-47">TIME$ / DATE$</a><a href="#command-48" data-target="command-48">ABS / SGN</a><a href="#command-49" data-target="command-49">INT / FIX</a><a href="#command-50" data-target="command-50">SQR / LOG / EXP</a><a href="#command-51" data-target="command-51">SIN / COS / TAN / ATN / PI</a><a href="#command-52" data-target="command-52">RND / RANDOMIZE</a><a href="#command-53" data-target="command-53">CINT / CSNG / CDBL</a><a href="#command-54" data-target="command-54">LEN</a><a href="#command-55" data-target="command-55">LEFT$ / RIGHT$</a><a href="#command-56" data-target="command-56">MID$</a><a href="#command-57" data-target="command-57">MID$代入</a><a href="#command-58" data-target="command-58">INSTR</a><a href="#command-59" data-target="command-59">SPACE$ / STRING$</a><a href="#command-60" data-target="command-60">ASC / CHR$</a><a href="#command-61" data-target="command-61">VAL / STR$</a><a href="#command-62" data-target="command-62">HEX$ / OCT$</a><a href="#command-63" data-target="command-63">ラベル（*名前）</a></nav><div id="entries"><article id="command-0" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-0" aria-label="RUNへのリンク">#</a></div>
+<h2>RUN</h2><h3>書式</h3><pre class="syntax"><code>RUN [行番号または*ラベル]</code></pre>
+<p>プログラムを先頭または指定行から実行します。変数・配列・型宣言・関数定義を初期化します。</p><h3>例</h3><pre><code>RUN 100</code></pre><p class="note">即時専用。指定行は存在する必要があります。</p></article>
+<article id="command-1" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-1" aria-label="LISTへのリンク">#</a></div>
+<h2>LIST</h2><h3>書式</h3><pre class="syntax"><code>LIST [開始-終了]</code></pre>
+<p>保存されているプログラムを行番号順に表示します。</p><h3>例</h3><pre><code>LIST
+LIST 100
+LIST 100-200
+LIST -100
+LIST 100-</code></pre><p class="note">即時専用。表示した行へ↑↓で移動して編集し、Enterで確定できます。</p></article>
+<article id="command-2" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-2" aria-label="NEWへのリンク">#</a></div>
+<h2>NEW</h2><h3>書式</h3><pre class="syntax"><code>NEW</code></pre>
+<p>プログラムと変数を消去します。</p><h3>例</h3><pre><code>NEW</code></pre><p class="note">即時専用。必要なプログラムは先にSAVEしてください。</p></article>
+<article id="command-3" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-3" aria-label="CLEARへのリンク">#</a></div>
+<h2>CLEAR</h2><h3>書式</h3><pre class="syntax"><code>CLEAR</code></pre>
+<p>プログラムを残して変数・配列・型宣言・関数定義とDATAの読込位置を初期化します。</p><h3>例</h3><pre><code>A=123:CLEAR:PRINT A</code></pre><p class="note">数値の初期値は0、文字列は空文字。メモリサイズ等の引数は未対応。</p></article>
+<article id="command-4" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-4" aria-label="DELETEへのリンク">#</a></div>
+<h2>DELETE</h2><h3>書式</h3><pre class="syntax"><code>DELETE 開始[-終了]</code></pre>
+<p>指定行・範囲を削除します。変数も初期化します。</p><h3>例</h3><pre><code>DELETE 100
+DELETE 100-200
+DELETE -100
+DELETE 100-</code></pre><p class="note">即時専用。行番号だけの入力でもその行を削除できます。</p></article>
+<article id="command-5" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-5" aria-label="RENUMへのリンク">#</a></div>
+<h2>RENUM</h2><h3>書式</h3><pre class="syntax"><code>RENUM [新行番号][,[旧開始行番号][,増分]]</code></pre>
+<p>行番号とGOTO・GOSUB・ON・THEN/ELSE・RESTORE等の数値参照を更新します。省略値は10、全体、10刻みです。</p><h3>例</h3><pre><code>RENUM
+RENUM 100,,5
+RENUM 1000,200,10</code></pre><p class="note">即時専用。新番号1〜65529、増分1以上。文字列・REM・DATAの数字は保持。参照先不明・番号衝突・逆転・上限超過は変更せずエラー。変数を初期化します。</p></article>
+<article id="command-6" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-6" aria-label="SAVEへのリンク">#</a></div>
+<h2>SAVE</h2><h3>書式</h3><pre class="syntax"><code>SAVE &quot;名前&quot;[,A]</code></pre>
+<p>現在のプログラムをブラウザ内に名前付き保存します。同名は上書きします。</p><h3>例</h3><pre><code>SAVE &quot;GAME&quot;</code></pre><p class="note">即時専用。同じブラウザ・同じオリジンのlocalStorage。Aの有無で形式は変わりません。PCのファイルには保存しません。</p></article>
+<article id="command-7" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-7" aria-label="LOADへのリンク">#</a></div>
+<h2>LOAD</h2><h3>書式</h3><pre class="syntax"><code>LOAD &quot;名前&quot;[,R]</code></pre>
+<p>保存したプログラムに置き換えます。Rを付けると読み込み後に実行します。</p><h3>例</h3><pre><code>LOAD &quot;GAME&quot;
+LOAD &quot;GAME&quot;,R</code></pre><p class="note">即時専用。現在の編集内容は置き換わり、変数は初期化されます。</p></article>
+<article id="command-8" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-8" aria-label="MERGEへのリンク">#</a></div>
+<h2>MERGE</h2><h3>書式</h3><pre class="syntax"><code>MERGE &quot;名前&quot;</code></pre>
+<p>保存したプログラムを現在のプログラムへ結合します。同じ行番号は保存側の内容を採用します。</p><h3>例</h3><pre><code>MERGE &quot;SUBROUTINE&quot;</code></pre><p class="note">即時専用。変数を初期化します。</p></article>
+<article id="command-9" data-group="編集・保存">
+<div class="card-top"><span>編集・保存</span><a href="#command-9" aria-label="FILESへのリンク">#</a></div>
+<h2>FILES</h2><h3>書式</h3><pre class="syntax"><code>FILES</code></pre>
+<p>名前付き保存の一覧を表示します。</p><h3>例</h3><pre><code>FILES</code></pre><p class="note">即時専用。ワイルドカードや実機ドライブ指定は未対応。</p></article>
+<article id="command-10" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-10" aria-label="PRINT / ?へのリンク">#</a></div>
+<h2>PRINT / ?</h2><h3>書式</h3><pre class="syntax"><code>PRINT [式[; または , 式]…][; または ,]</code></pre>
+<p>値を表示して改行します。セミコロンは連続表示、カンマは空白8個。末尾に区切りを置くと改行を抑えます。</p><h3>例</h3><pre><code>PRINT &quot;こんにちは&quot;
+? 1+2
+PRINT &quot;A=&quot;;10;</code></pre><p class="note">カンマは実機のタブゾーンを再現せず固定8空白です。</p></article>
+<article id="command-11" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-11" aria-label="PRINT USINGへのリンク">#</a></div>
+<h2>PRINT USING</h2><h3>書式</h3><pre class="syntax"><code>PRINT USING 書式文字列;値[;値…]</code></pre>
+<p>#で数値の桁、小数点、桁区切り、符号を指定します。!は1文字、&amp;は全文字、バックスラッシュで空白を囲むと固定幅文字列です。</p><h3>例</h3><pre><code>PRINT USING &quot;###.##&quot;;12.3
+PRINT USING &quot;! &amp;&quot;;&quot;ABC&quot;;&quot;日本語&quot;</code></pre><p class="note">小数例の出力は「 12.30」。数値が幅を超えると%を付けます。通貨・指数書式は未対応。</p></article>
+<article id="command-12" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-12" aria-label="INPUTへのリンク">#</a></div>
+<h2>INPUT</h2><h3>書式</h3><pre class="syntax"><code>INPUT [&quot;案内&quot;;]変数[,変数…]</code></pre>
+<p>Enterまで入力を待ち、カンマで区切って変数へ代入します。</p><h3>例</h3><pre><code>INPUT &quot;名前&quot;;N$
+INPUT A,B</code></pre><p class="note">文字列をそのまま1行読む場合はLINE INPUT。Ctrl+Cで中断できます。</p></article>
+<article id="command-13" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-13" aria-label="LINE INPUTへのリンク">#</a></div>
+<h2>LINE INPUT</h2><h3>書式</h3><pre class="syntax"><code>LINE INPUT [&quot;案内&quot;;]文字列変数</code></pre>
+<p>空白やカンマを含め、入力した1行をそのまま読み込みます。</p><h3>例</h3><pre><code>LINE INPUT &quot;メモ&quot;;A$</code></pre><p class="note">回答はEnterで確定します。文字列変数を指定してください。</p></article>
+<article id="command-14" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-14" aria-label="CLSへのリンク">#</a></div>
+<h2>CLS</h2><h3>書式</h3><pre class="syntax"><code>CLS [モード]</code></pre>
+<p>文字と図形を選んで消去します。省略または1は文字、2は図形、3は両方です。</p><h3>例</h3><pre><code>CLS
+CLS 2
+CLS 3</code></pre><p class="note">文字消去時はカーソルを左上へ戻します。2では文字とカーソルを保持。ヘッダは消えません。</p></article>
+<article id="command-15" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-15" aria-label="COLORへのリンク">#</a></div>
+<h2>COLOR</h2><h3>書式</h3><pre class="syntax"><code>COLOR 色番号</code></pre>
+<p>以降の文字と、色を省略した図形の色を指定します。</p><h3>例</h3><pre><code>COLOR 4:PRINT &quot;GREEN&quot;</code></pre><p class="note">0〜7を使います。追加の背景色・パレット引数は反映しません。</p></article>
+<article id="command-16" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-16" aria-label="LOCATEへのリンク">#</a></div>
+<h2>LOCATE</h2><h3>書式</h3><pre class="syntax"><code>LOCATE 桁[,行]</code></pre>
+<p>文字カーソルを移動します。桁0〜79、行0〜24。行を省略すると現在行です。</p><h3>例</h3><pre><code>LOCATE 10,5:PRINT &quot;HELLO&quot;</code></pre><p class="note">範囲外は画面内に丸めます。桁を空欄にする形式やカーソル表示指定は未対応。</p></article>
+<article id="command-17" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-17" aria-label="SPC / TABへのリンク">#</a></div>
+<h2>SPC / TAB</h2><h3>書式</h3><pre class="syntax"><code>SPC(空白数) / TAB(桁)</code></pre>
+<p>PRINTで空白を挿入します。TABは指定桁まで進み、現在より左なら改行して進みます。</p><h3>例</h3><pre><code>PRINT &quot;A&quot;;SPC(3);&quot;B&quot;
+PRINT TAB(10);&quot;TITLE&quot;</code></pre><p class="note">SPCは0〜1000、TABは0〜79。この実装の桁は0始まりです。</p></article>
+<article id="command-18" data-group="表示・入力">
+<div class="card-top"><span>表示・入力</span><a href="#command-18" aria-label="POS / CSRLINへのリンク">#</a></div>
+<h2>POS / CSRLIN</h2><h3>書式</h3><pre class="syntax"><code>POS(0) / CSRLIN</code></pre>
+<p>現在の文字カーソルの桁・行を返します。</p><h3>例</h3><pre><code>LOCATE 5,3:PRINT POS(0);CSRLIN</code></pre><p class="note">0始まり。POSは引数が必要ですが値は使いません。</p></article>
+<article id="command-19" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-19" aria-label="LETへのリンク">#</a></div>
+<h2>LET</h2><h3>書式</h3><pre class="syntax"><code>[LET] 変数=式</code></pre>
+<p>変数または配列要素へ値を代入します。</p><h3>例</h3><pre><code>A=10
+LET N$=&quot;日本語&quot;</code></pre><p class="note">文字列変数には文字列、数値変数には数値を代入します。</p></article>
+<article id="command-20" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-20" aria-label="REM / &#x27;へのリンク">#</a></div>
+<h2>REM / &#x27;</h2><h3>書式</h3><pre class="syntax"><code>REM コメント / &#x27; コメント</code></pre>
+<p>その行の残りをコメントとして扱います。</p><h3>例</h3><pre><code>10 REM 説明
+20 A=1:REM 初期値</code></pre><p class="note">コメント内のコロン以降も実行しません。</p></article>
+<article id="command-21" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-21" aria-label="IF / THEN / ELSEへのリンク">#</a></div>
+<h2>IF / THEN / ELSE</h2><h3>書式</h3><pre class="syntax"><code>IF 条件 THEN 命令・行番号・*ラベル [ELSE 命令・行番号・*ラベル]</code></pre>
+<p>条件が0でなければTHEN側、0ならELSE側を実行します。</p><h3>例</h3><pre><code>10 IF A&gt;0 THEN PRINT &quot;YES&quot; ELSE PRINT &quot;NO&quot;
+20 IF A=0 THEN 100
+100 END</code></pre><p class="note">1行形式のみ。THEN側のコロン連結も条件の対象です。複数行IFや複雑な入れ子は未対応。</p></article>
+<article id="command-22" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-22" aria-label="GOTOへのリンク">#</a></div>
+<h2>GOTO</h2><h3>書式</h3><pre class="syntax"><code>GOTO 行番号または*ラベル</code></pre>
+<p>指定した保存プログラムの行へ移動します。</p><h3>例</h3><pre><code>10 PRINT &quot;LOOP&quot;
+20 GOTO 10</code></pre><p class="note">行番号または定義済みラベルを指定します。Ctrl+Cで停止できます。</p></article>
+<article id="command-23" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-23" aria-label="GOSUB / RETURNへのリンク">#</a></div>
+<h2>GOSUB / RETURN</h2><h3>書式</h3><pre class="syntax"><code>GOSUB 行番号または*ラベル / RETURN</code></pre>
+<p>サブルーチンを呼び出し、RETURNで呼び出し直後へ戻ります。</p><h3>例</h3><pre><code>10 GOSUB 100
+20 END
+100 PRINT &quot;SUB&quot;
+110 RETURN</code></pre><p class="note">RETURNの行番号指定は未対応。サブルーチンへの自然な流れ込みを避けるためENDを置きます。</p></article>
+<article id="command-24" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-24" aria-label="ON GOTO / ON GOSUBへのリンク">#</a></div>
+<h2>ON GOTO / ON GOSUB</h2><h3>書式</h3><pre class="syntax"><code>ON 式 GOTO 行1,行2,… / ON 式 GOSUB 行1,行2,…</code></pre>
+<p>式の値が1なら行1、2なら行2を選びます。</p><h3>例</h3><pre><code>10 ON 2 GOSUB 100,200
+20 END
+100 PRINT &quot;ONE&quot;:RETURN
+200 PRINT &quot;TWO&quot;:RETURN</code></pre><p class="note">値は小数を切り捨て、0〜255。0または候補数を超える場合は次へ進みます。ON ERRORは未対応。 移動先には*ラベルも指定でき、行番号と混在できます。</p></article>
+<article id="command-25" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-25" aria-label="FOR / NEXTへのリンク">#</a></div>
+<h2>FOR / NEXT</h2><h3>書式</h3><pre class="syntax"><code>FOR 変数=開始 TO 終了 [STEP 増分] / NEXT [変数[,変数…]]</code></pre>
+<p>指定範囲で繰り返します。STEP省略は1、負数も指定できます。</p><h3>例</h3><pre><code>FOR I=1 TO 3:PRINT I:NEXT I</code></pre><p class="note">STEP 0はエラー。入れ子に対応。即時モードではFORとNEXTを同じ入力内に書きます。</p></article>
+<article id="command-26" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-26" aria-label="WHILE / WENDへのリンク">#</a></div>
+<h2>WHILE / WEND</h2><h3>書式</h3><pre class="syntax"><code>WHILE 条件 / WEND</code></pre>
+<p>条件が0でない間、繰り返します。</p><h3>例</h3><pre><code>10 WHILE I&lt;3
+20 PRINT I:I=I+1
+30 WEND</code></pre><p class="note">入れ子に対応。即時モードではWHILEとWENDを同じ入力内に書きます。</p></article>
+<article id="command-27" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-27" aria-label="END / STOPへのリンク">#</a></div>
+<h2>END / STOP</h2><h3>書式</h3><pre class="syntax"><code>END / STOP</code></pre>
+<p>現在の実行を終了します。</p><h3>例</h3><pre><code>10 PRINT &quot;DONE&quot;
+20 END</code></pre><p class="note">この版のSTOPも終了扱いです。CONTによる再開は未対応。変数は終了後も参照できます。</p></article>
+<article id="command-28" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-28" aria-label="DEF FNへのリンク">#</a></div>
+<h2>DEF FN</h2><h3>書式</h3><pre class="syntax"><code>DEF FN名前(引数[,引数…])=式</code></pre>
+<p>式からなる関数を定義します。呼び出し中のみ引数の変数を置き換え、終了時に戻します。</p><h3>例</h3><pre><code>DEF FNSQ(X)=X*X:PRINT FNSQ(12)</code></pre><p class="note">関数名はFNで始めます。定義・呼び出しとも括弧が必要。呼び出し深さは64まで。</p></article>
+<article id="command-29" data-group="変数・データ">
+<div class="card-top"><span>変数・データ</span><a href="#command-29" aria-label="DIMへのリンク">#</a></div>
+<h2>DIM</h2><h3>書式</h3><pre class="syntax"><code>DIM 名前(最大添字[,最大添字…])[,名前(最大添字)…]</code></pre>
+<p>数値・文字列の配列を宣言します。</p><h3>例</h3><pre><code>DIM A(10),N$(3)
+A(10)=123</code></pre><p class="note">既定は添字0始まり。A(10)は0〜10の11要素です。自動DIMはなく、使用前の宣言が必要。</p></article>
+<article id="command-30" data-group="変数・データ">
+<div class="card-top"><span>変数・データ</span><a href="#command-30" aria-label="OPTION BASEへのリンク">#</a></div>
+<h2>OPTION BASE</h2><h3>書式</h3><pre class="syntax"><code>OPTION BASE 0 または OPTION BASE 1</code></pre>
+<p>配列の最小添字を指定します。</p><h3>例</h3><pre><code>OPTION BASE 1:DIM A(10)</code></pre><p class="note">配列を宣言する前に指定します。RUN/CLEARで0に戻ります。</p></article>
+<article id="command-31" data-group="変数・データ">
+<div class="card-top"><span>変数・データ</span><a href="#command-31" aria-label="ERASEへのリンク">#</a></div>
+<h2>ERASE</h2><h3>書式</h3><pre class="syntax"><code>ERASE 配列名[,配列名…]</code></pre>
+<p>配列の宣言と値を消します。</p><h3>例</h3><pre><code>DIM A(10):ERASE A:DIM A(20)</code></pre><p class="note">添字や括弧は付けません。存在しない配列はエラー。</p></article>
+<article id="command-32" data-group="変数・データ">
+<div class="card-top"><span>変数・データ</span><a href="#command-32" aria-label="SWAPへのリンク">#</a></div>
+<h2>SWAP</h2><h3>書式</h3><pre class="syntax"><code>SWAP 変数1,変数2</code></pre>
+<p>2つの値を交換します。配列要素も使えます。</p><h3>例</h3><pre><code>A=1:B=2:SWAP A,B:PRINT A;B</code></pre><p class="note">文字列と数値の交換はできません。</p></article>
+<article id="command-33" data-group="変数・データ">
+<div class="card-top"><span>変数・データ</span><a href="#command-33" aria-label="DEFINT / DEFSNG / DEFDBL / DEFSTRへのリンク">#</a></div>
+<h2>DEFINT / DEFSNG / DEFDBL / DEFSTR</h2><h3>書式</h3><pre class="syntax"><code>DEF型 頭文字[-頭文字][,頭文字…]</code></pre>
+<p>接尾辞のない変数の既定型を頭文字で指定します。</p><h3>例</h3><pre><code>DEFINT I-N
+DEFSTR A-C
+A=&quot;文字列&quot;</code></pre><p class="note">$・%・!・#の接尾辞を優先。数値型の精度を実機どおりに分ける実装ではありません。</p></article>
+<article id="command-34" data-group="変数・データ">
+<div class="card-top"><span>変数・データ</span><a href="#command-34" aria-label="DATA / READへのリンク">#</a></div>
+<h2>DATA / READ</h2><h3>書式</h3><pre class="syntax"><code>DATA 値[,値…] / READ 変数[,変数…]</code></pre>
+<p>プログラム中のDATAを先頭から順に読みます。</p><h3>例</h3><pre><code>10 DATA 10,&quot;日本語&quot;
+20 READ A,B$
+30 PRINT A;B$</code></pre><p class="note">DATAは固定値です。式として評価しません。読み切った後のREADはエラー。</p></article>
+<article id="command-35" data-group="変数・データ">
+<div class="card-top"><span>変数・データ</span><a href="#command-35" aria-label="RESTOREへのリンク">#</a></div>
+<h2>RESTORE</h2><h3>書式</h3><pre class="syntax"><code>RESTORE [行番号または*ラベル]</code></pre>
+<p>DATAの読込位置を先頭、または指定行以降の最初のDATAへ戻します。</p><h3>例</h3><pre><code>10 DATA 1,2
+20 READ A:RESTORE:READ B
+30 PRINT A;B</code></pre><p class="note">行番号を省略すると最初のDATAへ戻ります。</p></article>
+<article id="command-36" data-group="描画・音">
+<div class="card-top"><span>描画・音</span><a href="#command-36" aria-label="PSETへのリンク">#</a></div>
+<h2>PSET</h2><h3>書式</h3><pre class="syntax"><code>PSET (x,y)[,色]</code></pre>
+<p>グラフィック画面へ点を描きます。</p><h3>例</h3><pre><code>PSET (320,200),7</code></pre><p class="note">左上が(0,0)、右下が(639,399)。色省略はCOLORの色。</p></article>
+<article id="command-37" data-group="描画・音">
+<div class="card-top"><span>描画・音</span><a href="#command-37" aria-label="PRESETへのリンク">#</a></div>
+<h2>PRESET</h2><h3>書式</h3><pre class="syntax"><code>PRESET (x,y)[,色]</code></pre>
+<p>点を指定色で描きます。省略時は黒です。</p><h3>例</h3><pre><code>PRESET (320,200)</code></pre><p class="note">グラフィック画面だけが対象です。</p></article>
+<article id="command-38" data-group="描画・音">
+<div class="card-top"><span>描画・音</span><a href="#command-38" aria-label="LINEへのリンク">#</a></div>
+<h2>LINE</h2><h3>書式</h3><pre class="syntax"><code>LINE (x1,y1)-(x2,y2)[,色][,B または BF]</code></pre>
+<p>線を描きます。Bは長方形の枠、BFは塗りつぶしです。</p><h3>例</h3><pre><code>LINE (100,100)-(220,220),7,B
+LINE (10,10)-(50,50),2,BF</code></pre><p class="note">STEP座標、線種、開始点の省略は未対応。複雑な座標式は先に変数へ代入してください。</p></article>
+<article id="command-39" data-group="描画・音">
+<div class="card-top"><span>描画・音</span><a href="#command-39" aria-label="CIRCLEへのリンク">#</a></div>
+<h2>CIRCLE</h2><h3>書式</h3><pre class="syntax"><code>CIRCLE (x,y),半径[,色]</code></pre>
+<p>指定位置を中心に円を描きます。</p><h3>例</h3><pre><code>CIRCLE (320,200),60,6</code></pre><p class="note">半径は0以上。円弧・楕円比率・塗りつぶしオプションは未対応。</p></article>
+<article id="command-40" data-group="描画・音">
+<div class="card-top"><span>描画・音</span><a href="#command-40" aria-label="PAINTへのリンク">#</a></div>
+<h2>PAINT</h2><h3>書式</h3><pre class="syntax"><code>PAINT (x,y),塗り色[,境界色]</code></pre>
+<p>指定点から境界色まで塗りつぶします。境界色省略は塗り色と同じです。</p><h3>例</h3><pre><code>LINE (100,100)-(220,220),7,B
+PAINT (150,150),2,7</code></pre><p class="note">文字は境界になりません。開いた境界では外側まで塗られます。</p></article>
+<article id="command-41" data-group="描画・音">
+<div class="card-top"><span>描画・音</span><a href="#command-41" aria-label="POINTへのリンク">#</a></div>
+<h2>POINT</h2><h3>書式</h3><pre class="syntax"><code>POINT(x,y)</code></pre>
+<p>グラフィック画面の色番号を返します。</p><h3>例</h3><pre><code>PSET (10,20),3:PRINT POINT(10,20)</code></pre><p class="note">画面外は−1。文字の色は読みません。線の中間色は近いパレット色に判定します。</p></article>
+<article id="command-42" data-group="描画・音">
+<div class="card-top"><span>描画・音</span><a href="#command-42" aria-label="BEEPへのリンク">#</a></div>
+<h2>BEEP</h2><h3>書式</h3><pre class="syntax"><code>BEEP</code></pre>
+<p>短い単音を鳴らします。</p><h3>例</h3><pre><code>BEEP</code></pre><p class="note">約880Hz・0.12秒。引数による連続音制御は未対応。音量設定やブラウザの制限に依存します。</p></article>
+<article id="command-43" data-group="描画・音">
+<div class="card-top"><span>描画・音</span><a href="#command-43" aria-label="SCREEN / WIDTHへのリンク">#</a></div>
+<h2>SCREEN / WIDTH</h2><h3>書式</h3><pre class="syntax"><code>SCREEN 数値[,数値…] / WIDTH 数値[,数値…]</code></pre>
+<p>構文を受理しますが、表示モードは変更しません。</p><h3>例</h3><pre><code>SCREEN 0
+WIDTH 80,25</code></pre><p class="note">受理のみ。常に640×400、80桁×25行、8色です。</p></article>
+<article id="command-44" data-group="キー・時刻">
+<div class="card-top"><span>キー・時刻</span><a href="#command-44" aria-label="INKEY$へのリンク">#</a></div>
+<h2>INKEY$</h2><h3>書式</h3><pre class="syntax"><code>INKEY$</code></pre>
+<p>入力待ちをせず、キーを1文字取り出します。なければ空文字です。</p><h3>例</h3><pre><code>10 K$=INKEY$
+20 IF K$=&quot;&quot; THEN 10
+30 PRINT K$;ASC(K$)</code></pre><p class="note">括弧不要。実行画面をクリックしてキー入力へ。Enter=13、Backspace=8、Delete=127、右=28、左=29、上=30、下=31。Ctrl+C/Escは停止、Tabはフォーカス移動。現在の実装：キューが空でも、押している間は毎回文字を返します。リピート開始待ちはありません。複数キーでは最後に押した文字キーを優先。個別判定はKEYDOWN。実機の取得間隔との一致は未検証。</p></article>
+<article id="command-45" data-group="キー・時刻">
+<div class="card-top"><span>キー・時刻</span><a href="#command-45" aria-label="KEYDOWNへのリンク">#</a></div>
+<h2>KEYDOWN</h2><h3>書式</h3><pre class="syntax"><code>KEYDOWN(&quot;キー名&quot;)</code></pre>
+<p>押されていれば−1、離れていれば0を返します。</p><h3>例</h3><pre><code>PRINT KEYDOWN(&quot;LEFT&quot;)</code></pre><p class="note">ブラウザ独自拡張。LEFT/RIGHT/UP/DOWN/SPACE/ENTERや文字キー。ゲームループの中で使います。</p></article>
+<article id="command-46" data-group="キー・時刻">
+<div class="card-top"><span>キー・時刻</span><a href="#command-46" aria-label="SLEEPへのリンク">#</a></div>
+<h2>SLEEP</h2><h3>書式</h3><pre class="syntax"><code>SLEEP ミリ秒</code></pre>
+<p>指定時間だけ待ち、ブラウザに処理を譲ります。</p><h3>例</h3><pre><code>SLEEP 16</code></pre><p class="note">ブラウザ独自拡張。0〜60000。待機中もCtrl+Cで停止できます。</p></article>
+<article id="command-47" data-group="キー・時刻">
+<div class="card-top"><span>キー・時刻</span><a href="#command-47" aria-label="TIME$ / DATE$へのリンク">#</a></div>
+<h2>TIME$ / DATE$</h2><h3>書式</h3><pre class="syntax"><code>TIME$ / DATE$</code></pre>
+<p>マシンの現地時刻を文字列として返します。</p><h3>例</h3><pre><code>PRINT TIME$;DATE$</code></pre><p class="note">HH:MM:SSとYYYY/MM/DD。読み取り用。代入による時計変更は未対応。</p></article>
+<article id="command-48" data-group="数値関数">
+<div class="card-top"><span>数値関数</span><a href="#command-48" aria-label="ABS / SGNへのリンク">#</a></div>
+<h2>ABS / SGN</h2><h3>書式</h3><pre class="syntax"><code>ABS(x) / SGN(x)</code></pre>
+<p>絶対値と符号を返します。SGNは負数−1、0なら0、正数1です。</p><h3>例</h3><pre><code>PRINT ABS(-5);SGN(-5)</code></pre><p class="note">数値を渡してください。</p></article>
+<article id="command-49" data-group="数値関数">
+<div class="card-top"><span>数値関数</span><a href="#command-49" aria-label="INT / FIXへのリンク">#</a></div>
+<h2>INT / FIX</h2><h3>書式</h3><pre class="syntax"><code>INT(x) / FIX(x)</code></pre>
+<p>INTは小さい方の整数へ、FIXは小数部分を0方向へ切り捨てます。</p><h3>例</h3><pre><code>PRINT INT(-1.8);FIX(-1.8)</code></pre><p class="note">結果は−2と−1です。</p></article>
+<article id="command-50" data-group="数値関数">
+<div class="card-top"><span>数値関数</span><a href="#command-50" aria-label="SQR / LOG / EXPへのリンク">#</a></div>
+<h2>SQR / LOG / EXP</h2><h3>書式</h3><pre class="syntax"><code>SQR(x) / LOG(x) / EXP(x)</code></pre>
+<p>平方根、自然対数、eのx乗を返します。</p><h3>例</h3><pre><code>PRINT SQR(9);LOG(EXP(1))</code></pre><p class="note">SQRは0以上、LOGは正数を渡してください。定義域外やオーバーフローの診断は実機と異なります。</p></article>
+<article id="command-51" data-group="数値関数">
+<div class="card-top"><span>数値関数</span><a href="#command-51" aria-label="SIN / COS / TAN / ATN / PIへのリンク">#</a></div>
+<h2>SIN / COS / TAN / ATN / PI</h2><h3>書式</h3><pre class="syntax"><code>SIN(x) / COS(x) / TAN(x) / ATN(x) / PI</code></pre>
+<p>三角関数と逆正接、円周率です。角度はラジアンです。</p><h3>例</h3><pre><code>PRINT SIN(PI/2);COS(0);ATN(1)</code></pre><p class="note">PIはこの版の定数です。</p></article>
+<article id="command-52" data-group="数値関数">
+<div class="card-top"><span>数値関数</span><a href="#command-52" aria-label="RND / RANDOMIZEへのリンク">#</a></div>
+<h2>RND / RANDOMIZE</h2><h3>書式</h3><pre class="syntax"><code>RND または RND(x) / RANDOMIZE [種]</code></pre>
+<p>RNDは0以上1未満の疑似乱数。正数で次の値、0で直前の値、負数で種を設定して値を返します。</p><h3>例</h3><pre><code>RANDOMIZE 42:PRINT RND(1)
+RANDOMIZE 42:PRINT RND(1)</code></pre><p class="note">同じ種なら同じ数列。種省略は現在時刻。実機と同じ数列ではありません。</p></article>
+<article id="command-53" data-group="数値関数">
+<div class="card-top"><span>数値関数</span><a href="#command-53" aria-label="CINT / CSNG / CDBLへのリンク">#</a></div>
+<h2>CINT / CSNG / CDBL</h2><h3>書式</h3><pre class="syntax"><code>CINT(x) / CSNG(x) / CDBL(x)</code></pre>
+<p>CINTは整数丸め、CSNGは32bit浮動小数点への丸め、CDBLはJavaScript数値への変換です。</p><h3>例</h3><pre><code>PRINT CINT(2.8);CSNG(1/3);CDBL(10)</code></pre><p class="note">CINTは−32768〜32767。丸めはMath.round相当で、実機互換ではありません。</p></article>
+<article id="command-54" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-54" aria-label="LENへのリンク">#</a></div>
+<h2>LEN</h2><h3>書式</h3><pre class="syntax"><code>LEN(文字列)</code></pre>
+<p>文字列の長さを返します。</p><h3>例</h3><pre><code>PRINT LEN(&quot;ABC&quot;)</code></pre><p class="note">結果3。UnicodeのUTF-16単位で数えるため、一部の絵文字は2以上になります。</p></article>
+<article id="command-55" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-55" aria-label="LEFT$ / RIGHT$へのリンク">#</a></div>
+<h2>LEFT$ / RIGHT$</h2><h3>書式</h3><pre class="syntax"><code>LEFT$(文字列,長さ) / RIGHT$(文字列,長さ)</code></pre>
+<p>左端・右端から指定長の文字列を取り出します。</p><h3>例</h3><pre><code>PRINT LEFT$(&quot;ABCDE&quot;,2);RIGHT$(&quot;ABCDE&quot;,2)</code></pre><p class="note">長さは0以上の整数を指定してください。</p></article>
+<article id="command-56" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-56" aria-label="MID$へのリンク">#</a></div>
+<h2>MID$</h2><h3>書式</h3><pre class="syntax"><code>MID$(文字列,開始[,長さ])</code></pre>
+<p>1始まりの位置から文字列を取り出します。長さ省略は末尾までです。</p><h3>例</h3><pre><code>PRINT MID$(&quot;ABCDE&quot;,2,3)</code></pre><p class="note">出力BCD。UTF-16単位で扱います。</p></article>
+<article id="command-57" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-57" aria-label="MID$代入へのリンク">#</a></div>
+<h2>MID$代入</h2><h3>書式</h3><pre class="syntax"><code>MID$(文字列変数,開始[,長さ])=文字列</code></pre>
+<p>元の文字列の一部を上書きします。文字列を伸ばしません。</p><h3>例</h3><pre><code>A$=&quot;ABCDE&quot;:MID$(A$,2,2)=&quot;xy&quot;:PRINT A$</code></pre><p class="note">出力AxyDE。長さ省略は置換文字列の長さ。元の残り・指定長・置換文字列長の最小分を書き換えます。</p></article>
+<article id="command-58" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-58" aria-label="INSTRへのリンク">#</a></div>
+<h2>INSTR</h2><h3>書式</h3><pre class="syntax"><code>INSTR([開始,]文字列,検索文字列)</code></pre>
+<p>一致位置を1始まりで返します。見つからなければ0です。</p><h3>例</h3><pre><code>PRINT INSTR(3,&quot;ABABA&quot;,&quot;BA&quot;)</code></pre><p class="note">結果4。開始省略は1、指定範囲1〜65535。</p></article>
+<article id="command-59" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-59" aria-label="SPACE$ / STRING$へのリンク">#</a></div>
+<h2>SPACE$ / STRING$</h2><h3>書式</h3><pre class="syntax"><code>SPACE$(長さ) / STRING$(長さ,文字または文字コード)</code></pre>
+<p>空白、または指定文字を繰り返します。</p><h3>例</h3><pre><code>PRINT STRING$(5,&quot;*&quot;);SPACE$(3);&quot;END&quot;</code></pre><p class="note">SPACE$は最大1000、STRING$は0〜65535。文字列指定では先頭1単位のみ使います。</p></article>
+<article id="command-60" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-60" aria-label="ASC / CHR$へのリンク">#</a></div>
+<h2>ASC / CHR$</h2><h3>書式</h3><pre class="syntax"><code>ASC(文字列) / CHR$(コード)</code></pre>
+<p>先頭文字のコードと、コードに対応する文字を返します。</p><h3>例</h3><pre><code>PRINT ASC(&quot;A&quot;);CHR$(65)</code></pre><p class="note">JavaScriptのUTF-16コードを使い、Shift JISや実機の文字コードを再現しません。ASCに空文字は渡さないでください。</p></article>
+<article id="command-61" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-61" aria-label="VAL / STR$へのリンク">#</a></div>
+<h2>VAL / STR$</h2><h3>書式</h3><pre class="syntax"><code>VAL(文字列) / STR$(数値)</code></pre>
+<p>文字列先頭の数値を読む、または数値を文字列へ変換します。</p><h3>例</h3><pre><code>PRINT VAL(&quot;12ABC&quot;);STR$(123)</code></pre><p class="note">VALはparseFloat相当で読めなければ0。STR$は正数の先頭に空白を付けません。</p></article>
+<article id="command-62" data-group="文字列関数">
+<div class="card-top"><span>文字列関数</span><a href="#command-62" aria-label="HEX$ / OCT$へのリンク">#</a></div>
+<h2>HEX$ / OCT$</h2><h3>書式</h3><pre class="syntax"><code>HEX$(数値) / OCT$(数値)</code></pre>
+<p>16進・8進表記の文字列にします。</p><h3>例</h3><pre><code>PRINT HEX$(255);OCT$(8)</code></pre><p class="note">結果FFと10。−32768〜65535、負数は16bitの表現にします。</p></article>
+<article id="command-63" data-group="制御">
+<div class="card-top"><span>制御</span><a href="#command-63" aria-label="ラベル（*名前）へのリンク">#</a></div>
+<h2>ラベル（*名前）</h2><h3>書式</h3><pre class="syntax"><code>行番号 *名前[:命令]</code></pre>
+<p>移動先に名前を付けます。英字で始め、英数字・下線を使い、大文字小文字は区別しません。</p><h3>例</h3><pre><code>10 *LOOP:A=A+1
+20 PRINT A
+30 IF A&lt;3 THEN *LOOP</code></pre><p class="note">GOTO/GOSUB、IFのTHEN/ELSE、ON GOTO/GOSUB、RESTORE、即時RUNの参照先に指定可能。行番号は必要です。重複定義・未定義参照はエラー。RENUMでラベル名は変わりません。</p></article><p id="empty" hidden>該当する命令がありません。検索語や分類を変更してください。</p></div></div>
+<footer>2026-09-28版 · このリポジトリのsrc/basic.ts / src/session.ts / src/app.ts / src/keyboard.tsの実装に基づく独立したリファレンスです。原製品の公式マニュアルではありません。</footer>
+</main><script src="reference.js?v=20260928-modules1"></script></body></html>

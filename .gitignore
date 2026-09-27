@@ -1,0 +1,10 @@
+node_modules/
+*.tsbuildinfo
+dist/
+
+_site/
+.idea/
+*.iml
+.DS_Store
+.env
+.env.*
