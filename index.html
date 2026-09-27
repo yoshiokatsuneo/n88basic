@@ -11,7 +11,7 @@ body{margin:0;background:#f4f5ed;color:var(--ink);font:15px/1.8 system-ui,sans-s
 .wrap{max-width:1000px;margin:auto;padding:0 32px}
 header{height:88px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);gap:20px}
 .brand{font-weight:750;letter-spacing:.04em}.brand span{display:inline-grid;place-items:center;width:36px;height:36px;margin-right:12px;background:#214c38;color:#ecf3df;border-radius:6px;font:700 19px monospace}
-a{color:inherit;text-underline-offset:4px}header a{font-size:13px}
+a{color:inherit;text-underline-offset:4px}header a{font-size:13px}header nav{display:flex;gap:16px;flex-wrap:wrap;justify-content:flex-end}
 main{padding:80px 0 72px;display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
 .eyebrow{font-size:11px;letter-spacing:.18em;color:var(--muted)}
 h1{font-size:clamp(32px,4.6vw,48px);line-height:1.4;letter-spacing:-.035em;margin:20px 0}
@@ -31,7 +31,7 @@ a:focus-visible{outline:3px solid #769957;outline-offset:5px}
 </style>
 </head>
 <body><div class="wrap">
-<header><div class="brand"><span>88</span>AI N-88 BASIC</div><a href="reference.html">命令リファレンス</a></header>
+<header><div class="brand"><span>88</span>AI N-88 BASIC</div><nav aria-label="関連リンク"><a href="reference.html">命令リファレンス</a><a href="https://github.com/yoshiokatsuneo/n88basic" target="_blank" rel="noopener noreferrer" aria-label="GitHubリポジトリ（新しいタブで開く）">GitHub ↗</a></nav></header>
 <main>
 <section><div class="eyebrow">BASIC, IN YOUR BROWSER.</div><h1>あの黒い画面で、<br>またプログラミング。</h1>
 <p class="description">行番号をつけて、命令を書いて、RUN。<br>日本語表示、図形描画、キー操作を楽しめる、ブラウザで動くBASICです。</p>
